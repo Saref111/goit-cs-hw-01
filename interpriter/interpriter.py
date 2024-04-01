@@ -128,19 +128,17 @@ class Parser:
             self.error()
 
     def term(self):
-        token = self.current_token
+        node = self.factor()
 
-        if token.type == TokenType.MUL:
-            self.eat(TokenType.MUL)
-            node = self.factor()
-            return node
-        elif token.type == TokenType.DIV:
-            self.eat(TokenType.DIV)
-            node = self.factor()
-            return node
-        else:
-            return self.factor()
-    
+        while self.current_token.type in (TokenType.MUL, TokenType.DIV):
+            if token.type == TokenType.MUL:
+                self.eat(TokenType.MUL)
+            elif token.type == TokenType.DIV:
+                self.eat(TokenType.DIV)
+            node = BinOp(left=node, op=token, right=self.factor())
+
+        return node
+
     def factor(self):
         token = self.current_token
         if token.type == TokenType.INTEGER:
@@ -154,20 +152,15 @@ class Parser:
         else:
             return self.term()
 
-    def expr(self):
-        """Парсер для арифметичних виразів."""
+    def expr(self): 
         node = self.term()
 
-        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.DIV):
+        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
             token = self.current_token
             if token.type == TokenType.PLUS:
                 self.eat(TokenType.PLUS)
             elif token.type == TokenType.MINUS:
                 self.eat(TokenType.MINUS)
-            elif token.type == TokenType.MUL:
-                self.eat(TokenType.MUL)
-            elif token.type == TokenType.DIV:
-                self.eat(TokenType.DIV)
 
             node = BinOp(left=node, op=token, right=self.term())
 
